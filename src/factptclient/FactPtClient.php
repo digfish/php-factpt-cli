@@ -22,24 +22,40 @@ class FactPtClient {
             'base_uri' => 'http://api.sandbox.fact.pt/',
             'timeout'  => 10.0,
         ]);
-        #putenv('HTTP_PROXY=localhost:8888');
+        putenv('HTTP_PROXY=localhost:8888');
         $dotenv = Dotenv::createImmutable(".");
         $dotenv->load(); 
     }
 
-    protected function _invoke($uri, $http_met = 'GET', $data = [])
+
+    protected function _invoke_page($uri,$query=[]) {
+        $appResponse = $this->_invoke($uri,'GET',[],array_merge($query,['page'=>1]));
+        $resp_data = $appResponse->data;
+        while (isset($appResponse->next)) {
+            parse_str(parse_url($appResponse->next,PHP_URL_QUERY),$toks);
+            $appResponse = $this->_invoke($uri,'GET',[],['page'=>$toks['page']]);
+            $resp_data = array_merge($resp_data,$appResponse->data);
+        }
+        return $resp_data;
+    }
+
+    protected function _invoke($uri, $http_met = 'GET', $input_data = [],$query=[],$headers=[])
     {
         $resp = null;
-        try {
 
-            $resp = $this->client->request($http_met, $uri, [
-                'headers' => [
+        $headers = array_merge($headers, [
                     'x-auth-token' => $_ENV['FACTPT_TEST_API_KEY'],
                     'Content-type' => 'application/json',
                     'api-version' => '1.0.0'
-                ],
-                'body' => json_encode($data)
-		       
+                ]
+        );
+
+        try {
+
+            $resp = $this->client->request($http_met, $uri, [
+                'headers' => $headers,
+                'body' => json_encode($input_data),
+                'query' => $query
             ]);
         } catch (ClientException $e) {
             $this->_dumpError($e);
@@ -47,11 +63,14 @@ class FactPtClient {
             $this->lastResponse = $resp;
             return $resp;
         }
-		#print($resp->getBody()->getContents());
         $this->lastResponse = $resp;
         $parsed_response = json_decode($resp->getBody()->getContents());
-        return $parsed_response->AppResponse->data;
+
+        $appResponse = $parsed_response->AppResponse; 
+        return $appResponse;
     }
+
+
 
     public function lastStatus() {
         return $this->lastResponse->getStatusCode();
@@ -63,75 +82,57 @@ class FactPtClient {
     }
 
     public function listDocuments() {
-        return $this->_invoke('/documents');
+        return $this->_invoke_page('/documents');
     }
 
     public function createCustomer($new_customer) {
-    	return $this->_invoke('/clients','POST',$new_customer);
+    	return $this->_invoke('/clients','POST',$new_customer)->data;
     }
 
     public function getCustomer($customer_id) {
-		return $this->_invoke('/clients/'.$customer_id);
+		return $this->_invoke('/clients/'.$customer_id)->data;
 	}
 
 	public function listCustomers() {
-		return $this->_invoke('/clients');
+		return $this->_invoke_page('/clients');
 	}
 
+    public function searchCustomers($q) {
+        return $this->_invoke_page('/clients',['search'=>$q]);
+    }
+
     public function createProduct($new_product) {
-        return $this->_invoke('/products','POST',$new_product);
+        return $this->_invoke('/products','POST',$new_product)->data;
     }
 
     public function getProduct($product_id) {
-        return $this->_invoke('/products/'.$product_id);
+        return $this->_invoke('/products/'.$product_id)->data;
     }
 
     public function listProducts() {
-        return $this->_invoke('/products');
+        return $this->_invoke_page('/products');
     }
 
-    public function createInvoice($client_id,$items=[],$reference='') {
+    public function searchProducts($q) {
+        return $this->_invoke_page('/products',['search'=>$q]);
+    }
+
+    public function createInvoice($client_id,$items,$document=[]) {
         return $this->_invoke('/documents/invoice','POST',[
             'client' => [ 'id'=> $client_id],
-            'document' => [
-                'date' => date('Y-m-d'),
-                'paymentTerm' => 0,
-                'reference' => $reference
-            ],
-            'items' => [$items]
+            'document' => $document,
+            'items' => $items
         ]);
     }
 
     function getDocument($invoice_id) {
-        return $this->_invoke('/documents/'.$invoice_id);
+        return $this->_invoke('/documents/'.$invoice_id)->data;
+    }
+
+    function listTaxes() {
+        return $this->_invoke_page('/taxes');
     }
 
 
 }
 
-/*$factpt = new FactPtClient();
-
-print_r($factpt->listDocuments());
-
-$new_customer = new Customer();
-$new_customer->name = 'Samuel Viana';
-$new_customer->tin = 123456789;
-$new_customer->forceTin = TRUE;
-$new_customer->address = 'Rua da Paz, nº 1';
-$new_customer->zip = '8800-591';
-$new_customer->city = 'Porto';
-$new_customer->ric = TRUE;
-$new_customer->retention = FALSE;
-$new_customer->country = 'PT';
-$new_customer->brand = 'Smoobu';
-$new_customer->email = 'sam_viana@sapo.pt';
-$new_customer->site = 'http://digfish.org';
-$new_customer->phone = '912345678';
-$new_customer->finalConsumer = FALSE;
-
-
-$new_customer_id = $factpt->createCustomer(['client'=>$new_customer]);
-$new_customer_id = $new_customer_id->id;
-
-$customer = $factpt->getCustomer($new_customer_id);
-print_r($customer);*/

@@ -22,10 +22,11 @@ class FactPtClient {
             'base_uri' => 'http://api.sandbox.fact.pt/',
             'timeout'  => 10.0,
         ]);
-        putenv('HTTP_PROXY=localhost:8888');
-        $dotenv = Dotenv::createImmutable(".");
-        $dotenv->load(); 
-    }
+/*         $dotenv = Dotenv::createImmutable(".");
+        $dotenv->load();
+        if (!empty($_ENV['HTTP_PROXY']))
+            putenv("HTTP_PROXY=" . $_ENV['HTTP_PROXY']);
+ */    }
 
 
     protected function _invoke_page($uri,$query=[]) {
@@ -61,7 +62,7 @@ class FactPtClient {
             $this->_dumpError($e);
             $resp = $e->getResponse();
             $this->lastResponse = $resp;
-            return $resp;
+            throw new \Exception($e->getMessage(),$resp->getStatusCode(),$e);
         }
         $this->lastResponse = $resp;
         $parsed_response = json_decode($resp->getBody()->getContents());
@@ -98,7 +99,7 @@ class FactPtClient {
 	}
 
     public function searchCustomers($q) {
-        return $this->_invoke_page('/clients',['search'=>$q]);
+        return $this->_invoke('/clients','GET',[],['search'=>$q]);
     }
 
     public function createProduct($new_product) {
@@ -114,7 +115,7 @@ class FactPtClient {
     }
 
     public function searchProducts($q) {
-        return $this->_invoke_page('/products',['search'=>$q]);
+        return $this->_invoke('/products','GET',[],['search'=>$q]);
     }
 
     public function createInvoice($client_id,$items,$document=[]) {
@@ -131,6 +132,18 @@ class FactPtClient {
 
     function listTaxes() {
         return $this->_invoke_page('/taxes');
+     
+    }
+
+    /**
+     * @param $invoice_id
+     */
+    function getTax($tax_id) {
+        $all_taxes = $this->listTaxes();
+        $tax = array_filter($all_taxes, function ($tax) use ($tax_id) {
+            return $tax->id == $tax_id;
+        });
+        return $tax[0];
     }
 
 

@@ -1,7 +1,6 @@
 <?php
 
 require "vendor/autoload.php";
-#require "factpt_client.php";
 
 use PHPUnit\Framework\TestCase;
 use Dotenv\Dotenv;
@@ -112,13 +111,18 @@ class FactPtClientTest extends TestCase {
 		$this->assertEquals($this->client->lastStatus(), 200);
 	}
 
+	function testGetTax() {
+		$tax = $this->client->getTax(503);
+		$this->assertEquals($tax->id,503);
+	}
+
 
 	function testCreateInvoice() {
 		$new_created_invoice = $this->client->createInvoice(
 			self::$new_customer_id,
-			['id' => self::$new_product_id]);
-		self::$new_invoice_id = $new_created_invoice->id;
-		$this->assertNotNull($new_created_invoice->id);
+			[['id' => self::$new_product_id]]);
+		self::$new_invoice_id = $new_created_invoice->data->id;
+		$this->assertNotNull($new_created_invoice->data->id);
 	}
 
 	function testGetInvoice() {

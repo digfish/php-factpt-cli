@@ -22,11 +22,7 @@ class FactPtClient {
             'base_uri' => 'http://api.sandbox.fact.pt/',
             'timeout'  => 10.0,
         ]);
-/*         $dotenv = Dotenv::createImmutable(".");
-        $dotenv->load();
-        if (!empty($_ENV['HTTP_PROXY']))
-            putenv("HTTP_PROXY=" . $_ENV['HTTP_PROXY']);
- */    }
+    }
 
 
     protected function _invoke_page($uri,$query=[]) {
@@ -142,6 +138,14 @@ class FactPtClient {
         $all_taxes = $this->listTaxes();
         $tax = array_filter($all_taxes, function ($tax) use ($tax_id) {
             return $tax->id == $tax_id;
+        });
+        return $tax[0];
+    }
+
+    function searchTax($q) {
+        $all_taxes = $this->listTaxes();
+        $tax = array_filter($all_taxes, function ($tax) use ($q) {
+            return stristr($tax->description,$q);
         });
         return $tax[0];
     }

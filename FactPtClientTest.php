@@ -116,6 +116,11 @@ class FactPtClientTest extends TestCase {
 		$this->assertEquals($tax->id,503);
 	}
 
+	function testSearchTax() {
+		$tax = $this->client->searchTax('reduzida');
+		$this->assertStringContainsString('reduzida', $tax->description);
+	}
+
 
 	function testCreateInvoice() {
 		$new_created_invoice = $this->client->createInvoice(

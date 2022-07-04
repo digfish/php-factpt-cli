@@ -1,10 +1,10 @@
 ### php-factpt-cli ###
-PHP API Client implementation for the Online invoicing System solution provided by [FACT](www.fact.pt).
+PHP API Client implementation for the Online invoicing System solution provided by [FACT](http://www.fact.pt).
 
 
 ## Install
 
-The package is hosted on [packagist](packagist.org). To install run:
+The package is hosted on [packagist](http://packagist.org). To install run:
 ```
 composer install digfish/php-factpt-cli
 ```

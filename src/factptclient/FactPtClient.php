@@ -15,13 +15,25 @@ use \digfish\factptclient\elements\Customer;
 class FactPtClient {
 
     private $client;
-    protected $lastResponse;
+    public $lastResponse;
 
     function __construct() {
+
+        $base_uri = 'http://api.sandbox.fact.pt/';
+
+        if (file_exists('.env')) {
+            $dotenv = Dotenv::createImmutable('.');
+            $dotenv->load();
+            $_ENV['FACTPT_API_KEY'] = $_ENV['FACPT_TEST_API_KEY'];
+        } else {
+            $base_uri = 'https://api.fact.pt';
+        }
+
         $this->client = new Client([
-            'base_uri' => 'http://api.sandbox.fact.pt/',
+            'base_uri' => $base_uri,
             'timeout'  => 10.0,
         ]);
+        
     }
 
 
@@ -41,7 +53,7 @@ class FactPtClient {
         $resp = null;
 
         $headers = array_merge($headers, [
-                    'x-auth-token' => $_ENV['FACTPT_TEST_API_KEY'],
+                    'x-auth-token' => $_ENV['FACTPT_API_KEY'],
                     'Content-type' => 'application/json',
                     'api-version' => '1.0.0'
                 ]

@@ -9,6 +9,9 @@ The package is hosted on [packagist](http://packagist.org). To install run:
 composer install digfish/php-factpt-cli
 ```
 
+## Environment variables
+The variable `FACTPT_TEST_API_KEY` should hold the value of your API key. You can set this via a .`env` file or your own code using `putenv` or `$_ENV['FACTPT_TEST_API_KEY']`. If there is no such a file, it is assumed that is running on production.
+
 
 ## What is implemented ##
 

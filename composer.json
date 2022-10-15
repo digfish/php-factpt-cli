@@ -4,11 +4,11 @@
     "description": "Fact.pt Online Invoicing API Client",
     "license": "Apache-2.0",
     "require": {
-        "guzzlehttp/guzzle": "^7.4",
-        "vlucas/phpdotenv": "^5.4"
+        "guzzlehttp/guzzle": "^7.4"
     },
     "require-dev": {
-        "fakerphp/faker": "^1.19"
+        "fakerphp/faker": "^1.19",
+        "vlucas/phpdotenv": "^5.4"
     },
     "autoload": {
         "psr-4": {

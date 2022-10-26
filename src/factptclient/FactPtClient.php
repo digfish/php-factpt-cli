@@ -24,7 +24,7 @@ class FactPtClient {
         if (file_exists('.env')) {
             $dotenv = Dotenv::createImmutable('.');
             $dotenv->load();
-            $_ENV['FACTPT_API_KEY'] = $_ENV['FACPT_TEST_API_KEY'];
+            $_ENV['FACTPT_API_KEY'] = $_ENV['FACTPT_TEST_API_KEY'];
         } else {
             $base_uri = 'https://api.fact.pt';
         }

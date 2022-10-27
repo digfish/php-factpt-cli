@@ -134,6 +134,16 @@ class FactPtClient {
         ]);
     }
 
+    public function createInvoiceReceipt($client_id, $items, $document = [])
+    {
+        return $this->_invoke('/documents/invoicereceipt', 'POST', [
+            'client' => ['id' => $client_id],
+            'document' => $document,
+            'items' => $items
+        ]);
+    }
+
+
     function getDocument($invoice_id) {
         return $this->_invoke('/documents/'.$invoice_id)->data;
     }
@@ -149,7 +159,7 @@ class FactPtClient {
     function getTax($tax_id) {
         $all_taxes = $this->listTaxes();
         $tax = array_filter($all_taxes, function ($tax) use ($tax_id) {
-            return $tax->id == $tax_id;
+            return intval($tax->id) == intval($tax_id);
         });
         return $tax[0];
     }

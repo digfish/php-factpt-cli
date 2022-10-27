@@ -130,6 +130,17 @@ class FactPtClientTest extends TestCase {
 		$this->assertNotNull($new_created_invoice->data->id);
 	}
 
+
+	function testCreateInvoiceReceipt() {
+		$new_created_invoice = $this->client->createInvoiceReceipt(
+			self::$new_customer_id,
+			[['id' => self::$new_product_id]]
+		);
+		self::$new_invoice_id = $new_created_invoice->data->id;
+		$this->assertNotNull($new_created_invoice->data->id);
+
+	}
+
 	function testGetInvoice() {
 		$invoice = $this->client->getDocument(self::$new_invoice_id);
 		$this->assertEquals($invoice->id,self::$new_invoice_id);
